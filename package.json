@@ -1,0 +1,13 @@
+{
+    "name": "nameless",
+    "version": "0.1.0",
+    "dependencies": {
+        "express": "~4.13.4",
+        "express-session": "~1.13.0",
+        "body-parser": "~1.10.1",
+        "socket.io": "~1.4.5",
+        "mysql": "2.10.2",
+        "ent": "~2.2.0",
+        "lodash": "~4.2.0"
+    }
+}                                       
