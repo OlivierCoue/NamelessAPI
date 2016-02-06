@@ -1,7 +1,7 @@
 // /dbFunction/db.js
 
 var mysql      = require('mysql');
-var parameters = require('../config/parameters.json');
+var parameters = require('./config/parameters.json');
 
 var connection = mysql.createConnection({
     host     : parameters.host,

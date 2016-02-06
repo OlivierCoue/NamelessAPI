@@ -3,8 +3,7 @@
 schemas = {  
 	user: {
     	id: null,
-        username: null,
-        current_message_thread_id: null,
+        username: null,        
         state: null,
         createdDate: null,
         socketId: null
@@ -16,8 +15,6 @@ schemas = {
    	},
    	message: {
    		id: null,
-   		author_id: null,
-   		message_thread_id: null,
    		messageText: null,
    		createdDate: null
    	}

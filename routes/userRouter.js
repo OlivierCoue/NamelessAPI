@@ -3,7 +3,7 @@
 var express    		= require('express');
 var ent        		= require('ent');
 var User 			= require('../models/user');
-var states     		= require('../config/states');
+var states     		= require('../config/states.json');
 
 var router = express.Router();
 
@@ -44,7 +44,7 @@ router.route('/states')
         }else{
             var newState = req.body.state;
             User.findById(sess.userId, function(user){
-            	if(newState == states.CLOSED) sess.userId = null;
+            	if(newState == states.CLOSED) sess.userId = undefined;
             	user.set("state", newState);
             	user.save(function(user){
             		console.log("user updated");

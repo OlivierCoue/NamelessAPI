@@ -2,8 +2,9 @@
 
 var schemas 		= require("./schemas.js");  
 var _ 				= require("lodash");
-var db 				= require('../dbFunction/db');
-var states     		= require('../config/states');
+var db 				= require('../db');
+var states     		= require('../config/states.json');
+var MessageThread   = require('./messageThread');
 
 var User = function (data) {  
     this.data = this.sanitize(data);
@@ -44,6 +45,28 @@ User.prototype.save = function (callback) {
 	});
 }
 
+User.prototype.setMessageThread = function (messageThreadId, callback) {  
+    var self = this;
+    this.data = this.sanitize(this.data);
+    db.query(	'UPDATE user \
+    			SET current_message_thread_id  = (SELECT message_thread.id FROM message_thread WHERE message_thread.id = ? ) \
+    			WHERE user.id = ?', [messageThreadId, this.get("id")], function(err, rows){
+		if(err) throw err;
+		callback();
+	});
+}
+
+User.prototype.getMessageThread = function (callback) {  
+    var self = this;
+    this.data = this.sanitize(this.data);
+    db.query(	'SELECT message_thread.* \
+    			FROM message_thread, user \
+    			WHERE message_thread.id = user.current_message_thread_id AND user.id = ? ', [this.get("id")], function(err, rows){
+		if(err) throw err;
+		callback(new MessageThread(rows[0]));
+	});
+}
+
 User.findAll = function(callback){
 	db.query('SELECT * FROM user',function(err,rows){
         if(err) throw err;
@@ -66,7 +89,7 @@ User.findFriend = function(userId, callback){
     db.query('SELECT * FROM user WHERE user.state = ? AND user.id != ?', [states.SEARCHING, userId], function(err,rows){ 
     	if(err) throw err;    	
         callback(new User(rows[Math.round(Math.random() * (rows.length - 1))]));
-    });   
+    });
 };
 
 module.exports = User;
