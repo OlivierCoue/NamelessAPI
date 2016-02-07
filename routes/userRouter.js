@@ -10,7 +10,7 @@ var router = express.Router();
 /**
 * ROUTE FOR /api/users/friend
 */
-router.route('/friend')   
+router.route('/friend')
 	/* GET
     *  get one user to chat with
     */
@@ -31,11 +31,11 @@ router.route('/friend')
 * ROUTE FOR /api/users/states
 */
 router.route('/states')     
-    /* PUT
+    /* POST
     * update user's state - if state = closed : delete userId from session
     * @param    Integer    state
     */
-    .put(function(req, res) {        
+    .post(function(req, res) {        
         var sess=req.session;
         if (typeof(sess.userId) == 'undefined' || typeof(req.body.state) == 'undefined') {
             res.json({message: "no session or bad params"}); 

@@ -11,6 +11,9 @@ var session         = require('express-session');
 var userRouter      = require('./routes/userRouter');
 var chatRouter      = require('./routes/chatRouter');
 var messageRouter   = require('./routes/messageRouter');
+var myEventEmitter  = require('./events/myEventEmitter');
+
+myEventEmitter.emit('io', io);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -34,5 +37,8 @@ app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter);
 
 // START THE SERVER
+server.listen(3000, function(){
+  console.log('socket Listening port: 3000');
+});
 app.listen(port);
-console.log("Listening to port : " + port);
+console.log("Listening to port: " + port);

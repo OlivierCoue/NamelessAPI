@@ -1,5 +1,6 @@
 {
 	"SEARCHING": 111,
 	"CHATTING": 222,
+	"AWAY": 555,
 	"CLOSED": 999
 }
