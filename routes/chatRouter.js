@@ -44,8 +44,8 @@ router.route('/start')
     * @param    String    username
     *           String    socketId
     */
-    .post(function(req, res) {
-        if(typeof(req.body.username) == 'undefined' && typeof(req.body.socketId) == 'undefined'){
+    .post(function(req, res) {       
+        if(typeof(req.body.username) == 'undefined' || typeof(req.body.socketId) == 'undefined'){
             res.json({message: "bad params"});
             res.end();
             return;
@@ -151,7 +151,7 @@ function emitQuitEvent(currentUser, reason, callback){
         currentUser.getMessageThread(function(messageThread){
             messageThread.getRecipient(currentUser, function(recipient){
                 var recipient = new User(recipient);
-                io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason});
+                io.to(recipient.get("socketId")).emit(' ', {reason: reason});
                 console.log(recipient.get("socketId") + "   ----->   " + reason);
                 callback();
             });

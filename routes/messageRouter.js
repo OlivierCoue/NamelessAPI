@@ -4,8 +4,15 @@ var express    		= require('express');
 var User            = require('../models/user');
 var Message         = require('../models/message');
 var ent             = require('ent');
+var myEventEmitter  = require('../events/myEventEmitter');
 
 var router = express.Router();
+
+var io = null;
+
+myEventEmitter.on('io', function(ioInstance){
+    io = ioInstance;
+});
 
 /**
 * ROUTE FOR /api/message
@@ -29,7 +36,10 @@ router.route('/')
                     });
                     messageThread.addMessage(message, currentUser, function(message){
                         messageThread.getRecipient(currentUser, function(recipient){
-                            res.json({status: "OK", message: message, currentUser: currentUser, recipient: new User(recipient)});
+                            var recipient = new User(recipient);
+                            res.json({status: "OK", message: message, currentUser: currentUser, recipient: recipient});
+                            message.data.fromUs = false;                           
+                            io.to(recipient.get("socketId")).emit('message_received', {message: message});
                         });
                     });
                 });

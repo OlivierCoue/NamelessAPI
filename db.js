@@ -7,6 +7,7 @@ var connection = mysql.createConnection({
     host     : parameters.host,
     user     : parameters.user,
     password : parameters.password,
+    port  	 : parameters.port,
     database : parameters.database
 });
 
