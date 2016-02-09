@@ -1,9 +1,9 @@
 // /models/user.js
 
-var schemas 		= require("./schemas.js");  
 var _ 				= require("lodash");
 var db 				= require('../db');
 var states     		= require('../config/states.json');
+var schemas 		= require("./schemas.js");  
 var MessageThread   = require('./messageThread');
 
 var User = function (data) {  
@@ -28,18 +28,17 @@ User.prototype.set = function (name, value) {
 
 User.prototype.create = function (callback) {
     var self = this;
-    this.data = this.sanitize(this.data);    
-    db.query("INSERT INTO user SET ? ", this.data, function(err,rows){
+    this.data = this.sanitize(this.data);
+    db.query('INSERT INTO user SET username="'+this.data.username+'" , state='+this.data.state+' , createdDate="'+this.data.createdDate+'", socketId="'+this.data.socketId+'" , geoPoint=POINT(?, ?), searchRange=?', [this.data.geoPoint.x, this.data.geoPoint.y, this.data.searchRange], function(err,rows){    	
         if(err) throw err;
         self.set("id", rows.insertId);
     	callback(self);
-    });
+    });    
 }
-
 User.prototype.save = function (callback) {  
     var self = this;
     this.data = this.sanitize(this.data);
-    db.query('UPDATE user SET ? WHERE user.id = ? ', [this.data, this.get('id')], function(err, rows){
+    var query = db.query('UPDATE user SET username="'+this.data.username+'" , state='+this.data.state+' , createdDate="'+this.data.createdDate+'", socketId="'+this.data.socketId+'" , geoPoint=POINT(?, ?) , searchRange=? WHERE user.id = ? ', [this.data.geoPoint.x, this.data.geoPoint.y, this.data.searchRange, this.get('id')], function(err, rows){
 		if(err) throw err;
 		callback(self);
 	});
@@ -67,6 +66,32 @@ User.prototype.getMessageThread = function (callback) {
 	});
 }
 
+User.prototype.findFriend = function(callback){    					
+    db.query(	'SELECT * FROM user\
+    			WHERE\
+	    			MBRContains\
+	    			(\
+                        LineString\
+                        (\
+                            Point (\
+                                '+this.get("geoPoint").x+' + '+this.get("searchRange")+' / ( 111.1 / COS(RADIANS('+this.get("geoPoint").y+'))),\
+                                '+this.get("geoPoint").y+' + '+this.get("searchRange")+' / 111.1\
+                                ),\
+                            Point (\
+                                '+this.get("geoPoint").x+' - '+this.get("searchRange")+' / ( 111.1 / COS(RADIANS('+this.get("geoPoint").y+'))),\
+                                '+this.get("geoPoint").y+' - '+this.get("searchRange")+' / 111.1\
+                                )\
+                            ),\
+                        geoPoint\
+                    )\
+    			AND user.state = ?\
+    			AND user.id != ?\
+    			ORDER BY RAND() LIMIT 1', [states.SEARCHING, this.get("id")], function(err,rows){ 
+    	if(err) throw err;    	
+        callback(new User(rows[0]));
+    });
+};
+
 User.findAll = function(callback){
 	db.query('SELECT * FROM user',function(err,rows){
         if(err) throw err;
@@ -85,11 +110,28 @@ User.findById = function(userId, callback){
     });   
 };
 
-User.findFriend = function(userId, callback){ 
-    db.query('SELECT * FROM user WHERE user.state = ? AND user.id != ?', [states.SEARCHING, userId], function(err,rows){ 
+User.countInRange = function(x, y, searchRange, callback){
+	db.query(	'SELECT COUNT(*) AS friendNb FROM user\
+    			WHERE\
+	    			MBRContains\
+	    			(\
+                        LineString\
+                        (\
+                            Point (\
+                                '+x+' + '+searchRange+' / ( 111.1 / COS(RADIANS('+y+'))),\
+                                '+y+' + '+searchRange+' / 111.1\
+                                ),\
+                            Point (\
+                                '+x+' - '+searchRange+' / ( 111.1 / COS(RADIANS('+y+'))),\
+                                '+y+' - '+searchRange+' / 111.1\
+                                )\
+                            ),\
+                        geoPoint\
+                    )\
+    			AND (user.state = ? OR user.state = ?)', [states.SEARCHING, states.CHATTING], function(err,rows){     			
     	if(err) throw err;    	
-        callback(new User(rows[Math.round(Math.random() * (rows.length - 1))]));
+        callback(rows);
     });
-};
+}
 
 module.exports = User;

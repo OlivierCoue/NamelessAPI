@@ -5,7 +5,9 @@ schemas = {
     	id: null,
         username: null,        
         state: null,
+        searchRange: null,
         createdDate: null,
+        geoPoint:  { x: null, y: null},
         socketId: null
    	},
    	messageThread: {

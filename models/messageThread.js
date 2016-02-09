@@ -1,10 +1,10 @@
 // /models/messageThread.js
 
-var schemas 		= require('./schemas.js');  
-var _ 				= require('lodash');
-var db 				= require('../db');
+var _               = require('lodash');
+var db              = require('../db');
+var states          = require('../config/states.json');
+var schemas 		= require('./schemas.js');
 var User            = require('./user');
-var states     		= require('../config/states.json');
 
 var MessageThread = function (data) {  
     this.data = this.sanitize(data);

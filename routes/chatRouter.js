@@ -1,10 +1,10 @@
 // /routes/chatRouter.js
 
 var express         = require('express');
+var ent             = require('ent');
 var User            = require('../models/user');
 var MessageThread   = require('../models/messageThread');
 var states          = require('../config/states.json');
-var ent             = require('ent');
 var myEventEmitter  = require('../events/myEventEmitter');
 
 var router = express.Router();
@@ -36,16 +36,41 @@ router.route('/hello')
     });
 
 /**
+* ROUTE FOR /api/chat/count
+*/
+router.route('/count')
+    /* GET
+    * count users in chosen range
+    * @param    float    lat
+    *           float    long
+    *           int      range
+    */
+    .get(function(req, res) {        
+        if(typeof(req.query.range) == 'undefined' || typeof(req.query.lat) == 'undefined' || typeof(req.query.long) == 'undefined'){
+            res.json({message: "bad params"});
+            res.end();
+            return;
+        }else{
+            User.countInRange(parseFloat(req.query.lat), parseFloat(req.query.long), parseInt(req.query.range), function(count){
+                res.json({friendNb: count[0].friendNb});
+            })
+        }
+    });
+
+/**
 * ROUTE FOR /api/chat/start
 */
 router.route('/start')
     /* POST
-    * create user -> find someone to speak with -> found : create messageThread | notFound : return user 
+    * create user -> find someone to speak with -> found : create messageThread | notFound : return user
     * @param    String    username
     *           String    socketId
+    *           float     lat
+    *           float     long
+    *           int       range
     */
     .post(function(req, res) {       
-        if(typeof(req.body.username) == 'undefined' || typeof(req.body.socketId) == 'undefined'){
+        if(typeof(req.body.range) == 'undefined' || typeof(req.body.lat) == 'undefined' || typeof(req.body.long) == 'undefined' || typeof(req.body.username) == 'undefined' || typeof(req.body.socketId) == 'undefined'){
             res.json({message: "bad params"});
             res.end();
             return;
@@ -53,15 +78,17 @@ router.route('/start')
             var currentUser = new User({
                 username: ent.encode(req.body.username),
                 state: states.SEARCHING,
-                createdDate: new Date(),
-                socketId: req.body.socketId
+                searchRange: parseInt(req.body.range),
+                geoPoint: {x: parseFloat(req.body.lat), y: parseFloat(req.body.long)},                                       
+                socketId: req.body.socketId,
+                createdDate: new Date()
             });
             /* create user in db */
             currentUser.create(function(newUser){
                 req.session.userId = newUser.get("id");
                 currentUser = newUser;
                 /* search someone to speak with */
-                User.findFriend(currentUser.get("id"), function(friend){
+                currentUser.findFriend(function(friend){
                     /* if found */
                     if(friend.get("id") != null && friend.get("id") != ""){
                         createConversation(currentUser, friend, function(currentUser, friend, messageThread){
@@ -98,7 +125,7 @@ router.route('/next')
                 /* send quit event to ex friend if chatting */                
                 emitQuitEvent(currentUser, "next", function(){});                
 
-                User.findFriend(currentUser.get("id"), function(friend){
+                currentUser.findFriend(function(friend){
                     /* if found */
                     if(friend.get("id") != null && friend.get("id") != ""){
                         createConversation(currentUser, friend, function(currentUser, friend, messageThread){
@@ -137,8 +164,7 @@ router.route('/stop')
                 emitQuitEvent(currentUser, "stop", function(){});
 
                 currentUser.set("state", states.CLOSED);
-                currentUser.save(function(){
-                });
+                currentUser.save(function(){});
                 sess.userId = undefined;
                 res.json({message: "session closed"});
             });
@@ -171,7 +197,6 @@ function createConversation(currentUser, friend, callback){
         messageThread.addUser(friend, function(friend){});
     });
 }
-
 
 // Export module
 module.exports = router;

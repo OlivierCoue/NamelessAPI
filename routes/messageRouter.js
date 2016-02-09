@@ -1,9 +1,9 @@
 // /routes/messageRouter.js
 
 var express    		= require('express');
+var ent             = require('ent');
 var User            = require('../models/user');
 var Message         = require('../models/message');
-var ent             = require('ent');
 var myEventEmitter  = require('../events/myEventEmitter');
 
 var router = express.Router();
