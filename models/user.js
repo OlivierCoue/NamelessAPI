@@ -86,7 +86,8 @@ User.prototype.findFriend = function(callback){
                     )\
     			AND user.state = ?\
     			AND user.id != ?\
-    			ORDER BY RAND() LIMIT 1', [states.SEARCHING, this.get("id")], function(err,rows){ 
+                AND user.socketId != ?\
+    			ORDER BY RAND() LIMIT 1', [states.SEARCHING, this.get("id"), this.get("socketId")], function(err,rows){ 
     	if(err) throw err;    	
         callback(new User(rows[0]));
     });

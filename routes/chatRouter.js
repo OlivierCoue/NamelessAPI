@@ -20,9 +20,7 @@ myEventEmitter.on('io', function(ioInstance){
         io.to(socket.id).emit('connect_success', {socketId: socket.id});
     });
 
-})
-
-
+});
 
 /**
 * ROUTE FOR /api/chat/start
@@ -62,7 +60,7 @@ router.route('/count')
 */
 router.route('/start')
     /* POST
-    * create user -> find someone to speak with -> found : create messageThread | notFound : return user
+    * create user -> find someone to speak with -> found ? create messageThread : return user
     * @param    String    username
     *           String    socketId
     *           float     lat
@@ -110,7 +108,7 @@ router.route('/start')
 */
 router.route('/next')
     /* GET
-    * find someone to speak with -> found : create messageThread | notFound : change user state to SEARCHING return user
+    * find someone to speak with -> found ? create messageThread : change user state to SEARCHING return user
     */
     .get(function(req, res) {
         var sess=req.session;        
@@ -160,14 +158,14 @@ router.route('/stop')
             return;
         }else{
             var currentUser = User.findById(sess.userId, function(currentUser){
-                /* send quit event to ex friend if chatting */
-                emitQuitEvent(currentUser, "stop", function(){});
-
+                /* send quit event to ex friend if chatting */                
                 currentUser.set("state", states.CLOSED);
-                currentUser.save(function(){});
-                sess.userId = undefined;
-                res.json({message: "session closed"});
+                currentUser.save(function(){
+                    emitQuitEvent(currentUser, "stop", function(){});
+                    res.json({message: "session closed"});
+                });
             });
+            sess.userId = undefined;
         }
     });
 
