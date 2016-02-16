@@ -29,7 +29,7 @@ User.prototype.set = function (name, value) {
 User.prototype.create = function (callback) {
     var self = this;
     this.data = this.sanitize(this.data);
-    db.query('INSERT INTO user SET username="'+this.data.username+'" , state='+this.data.state+' , createdDate="'+this.data.createdDate+'", socketId="'+this.data.socketId+'" , geoPoint=POINT(?, ?), searchRange=?', [this.data.geoPoint.x, this.data.geoPoint.y, this.data.searchRange], function(err,rows){    	
+    db.query('INSERT INTO user SET username="'+this.data.username+'" , state='+this.data.state+' , createdDate="'+this.data.createdDate+'", socketId="'+this.data.socketId+'", geoPoint=POINT(?, ?), searchRange=?', [this.data.geoPoint.x, this.data.geoPoint.y, this.data.searchRange], function(err,rows){    	
         if(err) throw err;
         self.set("id", rows.insertId);
     	callback(self);
@@ -133,6 +133,13 @@ User.countInRange = function(x, y, searchRange, callback){
     	if(err) throw err;    	
         callback(rows);
     });
+};
+
+User.closeBySocketId = function(socketId, callback){
+    db.query('update user set user.state= ? where user.socketId = ?',[states.CLOSED, socketId], function(err, rows){
+        if(err) throw err;      
+        callback(rows);
+    })
 }
 
 module.exports = User;

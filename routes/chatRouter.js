@@ -18,8 +18,13 @@ myEventEmitter.on('io', function(ioInstance){
         console.log('New user connected !');
         console.log('ID :  '+socket.id);
         io.to(socket.id).emit('connect_success', {socketId: socket.id});
-    });
 
+        socket.on('disconnect', function() {            
+            User.closeBySocketId(socket.id, function(rows){
+                console.log('User disconnect! -> CLOSED');
+            })
+        });
+    });    
 });
 
 /**
@@ -73,13 +78,14 @@ router.route('/start')
             res.end();
             return;
         }else{
+            var now = new Date();
             var currentUser = new User({
                 username: ent.encode(req.body.username),
                 state: states.SEARCHING,
                 searchRange: parseInt(req.body.range),
                 geoPoint: {x: parseFloat(req.body.lat), y: parseFloat(req.body.long)},                                       
                 socketId: req.body.socketId,
-                createdDate: new Date()
+                createdDate: now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23)
             });
             /* create user in db */
             currentUser.create(function(newUser){
@@ -118,10 +124,10 @@ router.route('/next')
             return;
         }else{
             /* get the current user by id */
-            User.findById(sess.userId, function(currentUser){
+            User.findById(sess.userId, function(currentUser){                            
 
                 /* send quit event to ex friend if chatting */                
-                emitQuitEvent(currentUser, "next", function(){});                
+                emitQuitEvent(currentUser, "next", function(){});
 
                 currentUser.findFriend(function(friend){
                     /* if found */
@@ -170,17 +176,15 @@ router.route('/stop')
     });
 
 
-function emitQuitEvent(currentUser, reason, callback){
-    if(currentUser.get("state") == states.CHATTING){
-        currentUser.getMessageThread(function(messageThread){
-            messageThread.getRecipient(currentUser, function(recipient){
-                var recipient = new User(recipient);
-                io.to(recipient.get("socketId")).emit(' ', {reason: reason});
-                console.log(recipient.get("socketId") + "   ----->   " + reason);
-                callback();
-            });
+function emitQuitEvent(currentUser, reason, callback){    
+    currentUser.getMessageThread(function(messageThread){
+        messageThread.getRecipient(currentUser, function(recipient){
+            var recipient = new User(recipient);
+            io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason});
+            console.log(recipient.get("socketId") + "   ----->   " + reason);
+            callback();
         });
-    }
+    });    
 }
 
 function createConversation(currentUser, friend, callback){
