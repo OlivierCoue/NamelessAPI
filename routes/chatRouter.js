@@ -199,7 +199,7 @@ function emitQuitEvent(currentUser, reason, callback){
     currentUser.getMessageThread(function(messageThread){
         messageThread.getRecipient(currentUser, function(recipient){
             var recipient = new User(recipient);
-            io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason});
+            io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason, friend_id: recipient.get("id")});            
             console.log(recipient.get("socketId") + "   ----->   " + reason);
             callback();
         });
