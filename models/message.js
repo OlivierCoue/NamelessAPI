@@ -32,16 +32,17 @@ Message.prototype.create = function (author, messageThread, callback) {
     this.data = this.sanitize(this.data);
     db.query(   "INSERT INTO message SET message.messageText = ?, \
                 message.createdDate = ? , \
+                message.type = ? , \
                 message.author_id = (SELECT user.id FROM user WHERE user.id = ?), \
                 message.message_thread_id = (SELECT message_thread.id FROM message_thread WHERE message_thread.id = ?)"
-                , [this.data.messageText, this.data.createdDate, author.get("id"), messageThread.get("id")], function(err,rows){    
+                , [this.data.messageText, this.data.createdDate, this.data.type, author.get("id"), messageThread.get("id")], function(err,rows){    
         if(err) throw err;
         self.set("id", rows.insertId);        
     	callback(self);
     });
 }
 
-Message.prototype.save = function (callback) {  
+Message.prototype.save = function (callback) {
     var self = this;
     this.data = this.sanitize(this.data);
     db.query('UPDATE message SET ? WHERE message.id = ? ', [this.data, this.get('id')], function(err, rows){

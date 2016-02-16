@@ -2,7 +2,7 @@
 
 schemas = {  
 	user: {
-    	id: null,
+    	  id: null,
         username: null,        
         state: null,
         searchRange: null,
@@ -17,9 +17,18 @@ schemas = {
    	},
    	message: {
    		id: null,
+      type: null,
    		messageText: null,
    		createdDate: null
-   	}
+   	},
+    messageImage: {
+      id: null,
+      thumbnail_upload_dir: null,
+      thumbnail_name: null,
+      full_upload_dir: null,
+      full_name: null,
+      mime: null
+    }
 }
 
 module.exports = schemas;

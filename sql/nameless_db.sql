@@ -27,9 +27,10 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE IF NOT EXISTS `message` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,  
   `author_id` int(11) DEFAULT NULL,
   `message_thread_id` int(11) DEFAULT NULL,
+  `type` int(11) NOT NULL,
   `messageText` longtext COLLATE utf8_unicode_ci NOT NULL,
   `createdDate` datetime NOT NULL,
   PRIMARY KEY (`id`),
@@ -37,6 +38,15 @@ CREATE TABLE IF NOT EXISTS `message` (
   KEY `IDX_B6BD307F8829462F` (`message_thread_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
+CREATE TABLE IF NOT EXISTS `message_image` (
+  `id` int(11) NOT NULL,  
+  `thumbnail_upload_dir` varchar(255) NOT NULL,
+  `thumbnail_name` varchar(255) NOT NULL,
+  `full_upload_dir` varchar(255) NOT NULL,
+  `full_name` varchar(255) NOT NULL,
+  `mime` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 -- --------------------------------------------------------
 
 --

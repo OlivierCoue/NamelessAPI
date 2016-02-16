@@ -80,7 +80,7 @@ router.route('/start')
         }else{
             var sess=req.session;
             var now = new Date();
-            if(typeof(sess.userId) == 'undefined'){               
+            if(typeof(sess.userId) == 'undefined'){
                 var currentUser = new User({
                     username: ent.encode(req.body.username),
                     state: states.SEARCHING,
