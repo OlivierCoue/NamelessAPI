@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `message` (
   KEY `IDX_B6BD307F8829462F` (`message_thread_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
+
 CREATE TABLE IF NOT EXISTS `message_image` (
   `id` int(11) NOT NULL,
   `thumbnail_upload_dir` varchar(255) NOT NULL,

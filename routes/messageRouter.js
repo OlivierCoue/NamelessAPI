@@ -17,7 +17,7 @@ var upload = multer({
     return filename + "jpg";
   },
   limits: {fileSize: 10000000, files:2}  
-}).array('image', 2);
+}).upload.fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'full', maxCount: 1 }])
 
 var io = null;
 
@@ -81,11 +81,11 @@ router.route('/image')
                             }else{                                
                                 var messageImage = new MessageImage({
                                     id: message.get("id"),
-                                    thumbnail_upload_dir: req.files[0].destination,
-                                    thumbnail_name: req.files[0].filename,
-                                    full_upload_dir: req.files[1].destination,
-                                    full_name: req.files[1].filename,
-                                    mime: req.files[0].mimetype
+                                    thumbnail_upload_dir: req.files['thumbnail'][0].destination,
+                                    thumbnail_name: req.files['thumbnail'][0].filename,
+                                    full_upload_dir: req.files['full'][0].destination,
+                                    full_name: req.files['full'][0].filename,
+                                    mime: req.files['thumbnail'][0].mimetype
                                 });                                
                                 messageImage.create(function(messageImage){
 
