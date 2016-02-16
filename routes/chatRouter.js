@@ -19,12 +19,12 @@ myEventEmitter.on('io', function(ioInstance){
         console.log('ID :  '+socket.id);
         io.to(socket.id).emit('connect_success', {socketId: socket.id});
 
-        socket.on('disconnect', function() {            
+        socket.on('disconnect', function() {
             User.closeBySocketId(socket.id, function(rows){
                 console.log('User disconnect! -> CLOSED');
             })
         });
-    });    
+    });
 });
 
 /**
@@ -72,40 +72,42 @@ router.route('/start')
     *           float     long
     *           int       range
     */
-    .post(function(req, res) {       
+    .post(function(req, res) {
         if(typeof(req.body.range) == 'undefined' || typeof(req.body.lat) == 'undefined' || typeof(req.body.long) == 'undefined' || typeof(req.body.username) == 'undefined' || typeof(req.body.socketId) == 'undefined'){
             res.json({message: "bad params"});
             res.end();
             return;
         }else{
+            var sess=req.session;
             var now = new Date();
-            var currentUser = new User({
-                username: ent.encode(req.body.username),
-                state: states.SEARCHING,
-                searchRange: parseInt(req.body.range),
-                geoPoint: {x: parseFloat(req.body.lat), y: parseFloat(req.body.long)},                                       
-                socketId: req.body.socketId,
-                createdDate: now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23)
-            });
-            /* create user in db */
-            currentUser.create(function(newUser){
-                req.session.userId = newUser.get("id");
-                currentUser = newUser;
-                /* search someone to speak with */
-                currentUser.findFriend(function(friend){
-                    /* if found */
-                    if(friend.get("id") != null && friend.get("id") != ""){
-                        createConversation(currentUser, friend, function(currentUser, friend, messageThread){
-                            res.json({found: true, currentUser: currentUser, friend: friend, messageThread: messageThread});
-                            io.to(friend.get("socketId")).emit('friend_founded', {found: true, currentUser: friend, friend: currentUser, messageThread: messageThread});
-                        });
-                    }
-                    /* if not found */
-                    else{                        
-                        res.json({found: false, currentUser: currentUser});
-                    }
+            if(typeof(sess.userId) == 'undefined'){               
+                var currentUser = new User({
+                    username: ent.encode(req.body.username),
+                    state: states.SEARCHING,
+                    searchRange: parseInt(req.body.range),
+                    geoPoint: {x: parseFloat(req.body.lat), y: parseFloat(req.body.long)},                                       
+                    socketId: req.body.socketId,
+                    createdDate: now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23)
                 });
-            });
+                /* create user in db */
+                currentUser.create(function(newUser){
+                    req.session.userId = newUser.get("id");
+                    currentUser = newUser;
+                    findFriend(res, currentUser);                
+                });
+            }else{
+                User.findById(sess.userId, function(currentUser){
+                    currentUser.set("username", ent.encode(req.body.username));
+                    currentUser.set("state", states.SEARCHING);
+                    currentUser.set("searchRange", parseInt(req.body.range));
+                    currentUser.set("geoPoint", {x: parseFloat(req.body.lat), y: parseFloat(req.body.long)});
+                    currentUser.set("createdDate", now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23));
+                    currentUser.save(function(currentUser){
+                        findFriend(res,currentUser);
+                    });
+                });
+            }
+            
         }
     });
 
@@ -175,6 +177,23 @@ router.route('/stop')
         }
     });
 
+
+function findFriend(res,currentUser){
+    /* search someone to speak with */
+    currentUser.findFriend(function(friend){
+        /* if found */
+        if(friend.get("id") != null && friend.get("id") != ""){
+            createConversation(currentUser, friend, function(currentUser, friend, messageThread){
+                res.json({found: true, currentUser: currentUser, friend: friend, messageThread: messageThread});
+                io.to(friend.get("socketId")).emit('friend_founded', {found: true, currentUser: friend, friend: currentUser, messageThread: messageThread});
+            });
+        }
+        /* if not found */
+        else{                        
+            res.json({found: false, currentUser: currentUser});
+        }
+    });
+}
 
 function emitQuitEvent(currentUser, reason, callback){    
     currentUser.getMessageThread(function(messageThread){
