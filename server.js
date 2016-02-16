@@ -15,6 +15,7 @@ var myEventEmitter  = require('./events/myEventEmitter');
 
 myEventEmitter.emit('io', io);
 
+app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(session({
@@ -32,6 +33,9 @@ var router = express.Router();
 app.use(cors());
 
 // ROUNTING
+app.get('/', function(req, res) {
+    app.use(express.static(__dirname + '/public'));
+});
 app.use('/api/users', userRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/message', messageRouter);
