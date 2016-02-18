@@ -84,6 +84,9 @@ User.prototype.findFriend = function(callback){
                             ),\
                         geoPoint\
                     )\
+                AND user.searchRange >= SQRT(\
+                                        POW(69.1 * ('+this.get("geoPoint").x+' - x(user.geoPoint)), 2) +\
+                                        POW(69.1 * (y(user.geoPoint) - '+this.get("geoPoint").y+') * COS('+this.get("geoPoint").x+' / 57.3), 2))\
     			AND user.state = ?\
     			AND user.id != ?\
                 AND user.socketId != ?\

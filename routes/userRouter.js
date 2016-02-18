@@ -47,7 +47,7 @@ router.route('/states')
             	if(newState == states.CLOSED) sess.userId = undefined;
             	user.set("state", newState);
             	user.save(function(user){
-            		console.log("user updated");
+            		console.log(user.get("socketId") + " --------> user updated");
             	});
             });            
             res.end();

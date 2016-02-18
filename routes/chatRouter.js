@@ -173,7 +173,7 @@ router.route('/stop')
                     res.json({message: "session closed"});
                 });
             });
-            sess.userId = undefined;
+            //sess.userId = undefined;
         }
     });
 
@@ -199,7 +199,7 @@ function emitQuitEvent(currentUser, reason, callback){
     currentUser.getMessageThread(function(messageThread){
         messageThread.getRecipient(currentUser, function(recipient){
             var recipient = new User(recipient);
-            io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason, friend_id: recipient.get("id")});            
+            io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason, friend_id: currentUser.get("id")});            
             console.log(recipient.get("socketId") + "   ----->   " + reason);
             callback();
         });

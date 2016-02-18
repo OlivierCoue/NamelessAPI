@@ -16,7 +16,7 @@ var upload = multer({
   rename: function (fieldname, filename) {
     return filename + "jpg";
   },
-  limits: {fileSize: 10000000, files:2}  
+  limits: {fileSize: 100000000, files:2}  
 }).fields([{ name: 'thumbnail', maxCount: 1 }, { name: 'full', maxCount: 1 }])
 
 var io = null;
@@ -50,7 +50,7 @@ router.route('/')
                         messageThread.getRecipient(currentUser, function(recipient){
                             var recipient = new User(recipient);
                             res.json({status: "OK", message: message, currentUser: currentUser, recipient: recipient});
-                            message.data.fromUs = false;                           
+                            message.data.fromUs = false;
                             io.to(recipient.get("socketId")).emit('message_received', {type:MessageTypes.TEXT, message: message});
                         });
                     });
@@ -87,7 +87,7 @@ router.route('/image')
                                     full_name: req.files['full'][0].filename,
                                     mime: req.files['thumbnail'][0].mimetype
                                 });                                
-                                messageImage.create(function(messageImage){                               
+                                messageImage.create(function(messageImage){
 
                                     messageThread.getRecipient(currentUser, function(recipient){
                                         var recipient = new User(recipient);
