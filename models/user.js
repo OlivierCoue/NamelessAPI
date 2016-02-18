@@ -140,9 +140,12 @@ User.countInRange = function(x, y, searchRange, callback){
 
 User.closeBySocketId = function(socketId, callback){
     db.query('update user set user.state= ? where user.socketId = ?',[states.CLOSED, socketId], function(err, rows){
-        if(err) throw err;      
-        callback(rows);
+        if(err) throw err;                      
     })
+    db.query('select * from user where user.socketId = ?',[socketId], function(err, rows){
+        if(err) throw err;
+        callback(new User(rows[0]));
+    });
 }
 
 module.exports = User;

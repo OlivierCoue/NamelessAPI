@@ -20,8 +20,10 @@ myEventEmitter.on('io', function(ioInstance){
         io.to(socket.id).emit('connect_success', {socketId: socket.id});
 
         socket.on('disconnect', function() {
-            User.closeBySocketId(socket.id, function(rows){
+            User.closeBySocketId(socket.id, function(closedUser){
                 console.log('User disconnect! -> CLOSED');
+                emitQuitEvent(closedUser, "disconnect", function(){
+                });
             })
         });
     });
