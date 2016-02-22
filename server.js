@@ -8,10 +8,12 @@ var cors            = require('cors');
 var io              = require('socket.io').listen(server);
 var parameters      = require('./config/parameters.json');
 var session         = require('express-session');
+var authRouter		= require('./routes/authentificationRouter');
 var userRouter      = require('./routes/userRouter');
 var chatRouter      = require('./routes/chatRouter');
 var messageRouter   = require('./routes/messageRouter');
 var myEventEmitter  = require('./events/myEventEmitter');
+var security 		= require('./middlewares/security');
 
 myEventEmitter.emit('io', io);
 
@@ -33,6 +35,8 @@ var router = express.Router();
 app.use(cors());
 
 // ROUNTING
+app.all('/api/*', security);
+app.use('/auth', authRouter);
 app.get('/', function(req, res) {
     app.use(express.static(__dirname + '/public'));
 });

@@ -4,28 +4,9 @@ var express    		= require('express');
 var ent        		= require('ent');
 var User 			= require('../models/user');
 var states     		= require('../config/states.json');
+const crypto        = require('crypto');
 
 var router = express.Router();
-
-/**
-* ROUTE FOR /api/users/friend
-*/
-router.route('/friend')
-	/* GET
-    *  get one user to chat with
-    */
-    .get(function(req, res) {
-    	var sess=req.session;
-        if(typeof(sess.userId) == 'undefined'){
-            res.json({message: "no session"}); 
-            res.end();
-            return;
-        }else{                
-            User.findFriend(sess.userId, function(user){               
-                res.json(user);
-            });
-       	}       
-    });
 
 /**
 * ROUTE FOR /api/users/states
@@ -73,14 +54,6 @@ router.route('/')
         	req.session.userId = newUser.get("id");
         	res.end();
         })                 
-    })
-    /* GET
-    *  get all users
-    */
-    .get(function(req, res) {
-        User.findAll(function(users){            
-            res.json(users);
-        });
     });
 
 /**
@@ -94,7 +67,7 @@ router.route('/:user_id')
         var userIdParam = req.params.user_id;
         if(!isNaN(userIdParam)){
             User.findById(userIdParam, function(user){               
-                res.json(user);
+                res.json(user);                
             });
         }else{
             res.json({message: "bad params, must be a number"}); 

@@ -51,7 +51,7 @@ router.route('/')
                             var recipient = new User(recipient);
                             res.json({status: "OK", message: message, currentUser: currentUser, recipient: recipient});
                             message.data.fromUs = false;
-                            io.to(recipient.get("socketId")).emit('message_received', {type:MessageTypes.TEXT, message: message});
+                            io.to(recipient.get("socketId")).emit('message_received', {type:MessageTypes.TEXT, message: message});                            
                         });
                     });
                 });
