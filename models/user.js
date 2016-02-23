@@ -133,7 +133,7 @@ User.countInRange = function(x, y, searchRange, callback){
                         geoPoint\
                     )\
     			AND (user.state = ? OR user.state = ?)', [states.SEARCHING, states.CHATTING], function(err,rows){     			
-    	if(err) throw err;    	
+    	if(err) throw err;
         callback(rows);
     });
 };
