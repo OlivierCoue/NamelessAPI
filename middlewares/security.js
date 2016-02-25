@@ -1,9 +1,7 @@
+// /middlewares/security.js
+
 var parameters      = require('../config/parameters.json');
-var ursa            = require('ursa');
-const crypto        = require('crypto');
-const assert        = require('assert');
-const constants     = require('constants');
-var NodeRSA = require('node-rsa');
+var NodeRSA         = require('node-rsa');
 
 module.exports = function(req, res, next) {
     
@@ -11,14 +9,10 @@ module.exports = function(req, res, next) {
     var keyIn = (req.body && req.body.x_key) || (req.query && req.query.x_key) || req.headers['x-key'];
 
     if(typeof(sess.private_key) == 'undefined'){
-            res.status(403);
-            res.json({
-              "status": 403,
-              "message": "Not authentified"
-            });
-            return;
-    }else{
-        
+        res.status(403);
+        res.end();
+        return;
+    }else{        
         if(typeof(sess.api_key) == 'undefined'){
             if(keyIn){            
                 var key = new NodeRSA({b: 1024});
@@ -30,30 +24,20 @@ module.exports = function(req, res, next) {
                     next();
                 }else{
                     res.status(403);
-                    res.json({
-                        "status": 403,
-                        "message": "Nice try"
-                    });
+                    res.end();
                     return;
                 }
             }else{
-                res.status(401);
-                res.json({
-                    "status": 401,
-                    "message": "No api key given"
-                });
+                res.status(403);
+                res.end();
                 return;
             }
         }else{
             if(sess.api_key == parameters.api_key){
-                next();
-                console.log("Already authentified");
+                next();               
             }else{
                 res.status(403);
-                res.json({
-                  "status": 403,
-                  "message": "Nope"
-                });
+                res.end();
                 return;
             }
         }

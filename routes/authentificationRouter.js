@@ -1,8 +1,6 @@
 // /routes/authentificationRouter.js
 
 var express    		= require('express');
-var User 			= require('../models/user');
-var parameters      = require('../config/parameters.json');
 var NodeRSA         = require('node-rsa');
 
 var router = express.Router();
@@ -14,13 +12,12 @@ router.route('/')
     /* GET
     */
     .get(function(req, res) {
+
         var sess=req.session;    
 
         var key = new NodeRSA({b: 1024});
         
-        sess.private_key = key.exportKey("pkcs8-private");
-
-        console.log(key.exportKey("pkcs8-public-pem"));
+        sess.private_key = key.exportKey("pkcs8-private");       
         
         res.json({public_key: key.exportKey("pkcs8-public-pem")});        
 

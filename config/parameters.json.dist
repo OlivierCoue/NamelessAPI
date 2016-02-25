@@ -2,6 +2,8 @@
 	"host": "hostname",
 	"user": "username",
 	"password": "password",
+	"port": 3306,
 	"database": "databaseName",
 	"secret": "secret"
+	"api_key": "superApiKey"
 }
