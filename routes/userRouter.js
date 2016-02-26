@@ -8,6 +8,49 @@ const crypto        = require('crypto');
 
 var router = express.Router();
 
+
+/**
+* ROUTE FOR /api/users/socket
+*/
+router.route('/socket')
+    /* POST
+    */
+    .post(function(req, res){
+        var sess=req.session;
+        if (typeof(req.body.socketId) == 'undefined') {
+            res.json({message: "bad params"}); 
+            res.end();
+            return;
+        }else{            
+            sess.socket_id = req.body.socketId;
+            res.end();
+        };
+    });
+
+/**
+* ROUTE FOR /api/users/updatesocket
+*/
+router.route('/updatesocket')
+    /* POST
+    */
+    .post(function(req, res){
+        var sess=req.session;
+        if (typeof(req.body.lastSocketId) == 'undefined' || typeof(req.body.newSocketId) == 'undefined') {
+            res.json({message: "bad params"}); 
+            res.end();
+            return;
+        }else{            
+            User.findBySocketId(lastSocketId, function(user){
+                sess.user_id = user.get("id");
+                user.set("socketId", req.body.newSocketId);
+                user.save(function(user){
+                    console.log("socketId updated");
+                    res.end();
+                });                
+            });                                
+        };
+    });
+
 /**
 * ROUTE FOR /api/users/states
 */

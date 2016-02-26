@@ -148,4 +148,11 @@ User.closeBySocketId = function(socketId, callback){
     });
 }
 
+User.findBySocketId =  function(socketId, callback){    
+    db.query('select * from user where user.socketId = ?',[socketId], function(err, rows){
+        if(err) throw err;
+        callback(new User(rows[0]));
+    });
+}
+
 module.exports = User;

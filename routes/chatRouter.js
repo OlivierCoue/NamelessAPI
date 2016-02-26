@@ -75,7 +75,7 @@ router.route('/start')
     *           int       range
     */
     .post(function(req, res) {
-        if(typeof(req.body.range) == 'undefined' || typeof(req.body.lat) == 'undefined' || typeof(req.body.long) == 'undefined' || typeof(req.body.username) == 'undefined' || typeof(req.body.socketId) == 'undefined'){
+        if(typeof(sess.socket_id) == 'undefined' || typeof(req.body.range) == 'undefined' || typeof(req.body.lat) == 'undefined' || typeof(req.body.long) == 'undefined' || typeof(req.body.username) == 'undefined'){
             res.json({message: "bad params"});
             res.end();
             return;
@@ -88,7 +88,7 @@ router.route('/start')
                     state: states.SEARCHING,
                     searchRange: parseInt(req.body.range),
                     geoPoint: {x: parseFloat(req.body.lat), y: parseFloat(req.body.long)},                                       
-                    socketId: req.body.socketId,
+                    socketId: sess.socket_id,
                     createdDate: now.toISOString().substring(0, 10) + " " + now.toISOString().substring(11, 23)
                 });
                 /* create user in db */
