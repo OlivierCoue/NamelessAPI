@@ -30,14 +30,14 @@ myEventEmitter.on('io', function(ioInstance){
 });
 
 /**
-* ROUTE FOR /api/chat/start
+* ROUTE FOR /api/chat/hello
 */
 router.route('/hello')
     /* GET
     */
     .get(function(req, res) {
         console.log("Hello, wellcome to the api !");
-        res.json({message: "Hello, wellcome to the api !"});
+        res.json({min_version: 3, message: "Hello, wellcome to the api !"});
     });
 
 /**
@@ -75,12 +75,12 @@ router.route('/start')
     *           int       range
     */
     .post(function(req, res) {
+        var sess=req.session;
         if(typeof(sess.socket_id) == 'undefined' || typeof(req.body.range) == 'undefined' || typeof(req.body.lat) == 'undefined' || typeof(req.body.long) == 'undefined' || typeof(req.body.username) == 'undefined'){
             res.json({message: "bad params"});
             res.end();
             return;
-        }else{
-            var sess=req.session;
+        }else{            
             var now = new Date();
             if(typeof(sess.userId) == 'undefined'){
                 var currentUser = new User({
@@ -179,6 +179,27 @@ router.route('/stop')
         }
     });
 
+/**
+* ROUTE FOR /api/chat/enter
+*/
+router.route('/enter')
+    /* POST
+    *
+    */
+    .post(function(req, res){
+        var sess=req.session;
+        if(typeof(sess.userId) == 'undefined'){
+            res.json({message: "no session"});
+            res.end();
+            return;
+        }else{
+            var currentUser = User.findById(sess.userId, function(currentUser){
+                emitEnterEvent(currentUser, function(){
+                    res.end();
+                })
+            });
+        }
+    });
 
 function findFriend(res,currentUser){
     /* search someone to speak with */
@@ -197,12 +218,22 @@ function findFriend(res,currentUser){
     });
 }
 
-function emitQuitEvent(currentUser, reason, callback){    
+function emitQuitEvent(currentUser, reason, callback){  
     currentUser.getMessageThread(function(messageThread){
         messageThread.getRecipient(currentUser, function(recipient){
             var recipient = new User(recipient);
             io.to(recipient.get("socketId")).emit('friend_quit', {reason: reason, friend_id: currentUser.get("id")});            
             console.log(recipient.get("socketId") + "   ----->   " + reason);
+            callback();
+        });
+    });    
+}
+
+function emitEnterEvent(currentUser, callback){  
+    currentUser.getMessageThread(function(messageThread){
+        messageThread.getRecipient(currentUser, function(recipient){
+            var recipient = new User(recipient);
+            io.to(recipient.get("socketId")).emit('friend_enter', {friend_id: currentUser.get("id")});            
             callback();
         });
     });    

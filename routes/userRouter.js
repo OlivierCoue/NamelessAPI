@@ -23,6 +23,7 @@ router.route('/socket')
             return;
         }else{            
             sess.socket_id = req.body.socketId;
+            res.json({message: "OK"}); 
             res.end();
         };
     });
@@ -40,11 +41,12 @@ router.route('/updatesocket')
             res.end();
             return;
         }else{            
-            User.findBySocketId(lastSocketId, function(user){
+            User.findBySocketId(req.body.lastSocketId, function(user){
                 sess.user_id = user.get("id");
                 user.set("socketId", req.body.newSocketId);
                 user.save(function(user){
                     console.log("socketId updated");
+                    res.json({message: "OK"}); 
                     res.end();
                 });                
             });                                
